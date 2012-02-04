@@ -12,6 +12,15 @@ gem 'sinatra-flash', :require => 'sinatra/flash'
 gem 'rack-less'
 gem 'erubis', "~> 2.7.0"
 
+# Development requirements
+group :development do
+  gem 'growl'
+  gem 'guard'
+  gem 'guard-less'
+  gem 'guard-coffeescript'
+  gem 'guard-livereload'
+end
+
 # Test requirements
 
 # Padrino Stable Gem
