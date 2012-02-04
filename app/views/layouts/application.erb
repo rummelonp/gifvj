@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>GifJV</title>
+    <%= stylesheet_link_tag "http://twitter.github.com/bootstrap/assets/css/bootstrap.css" %>
+    <%= javascript_include_tag "http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" %>
+    <!--[if IE]>
+      <%= javascript_include_tag "http://html5shiv.googlecode.com/svn/trunk/html5.js" %>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <%= yield %>
+    </div>
+  </body>
+</html>
