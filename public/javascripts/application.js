@@ -296,14 +296,15 @@ GifVJ.Player = (function() {
       form = $('#form-gifs');
       progress = $('.progress');
       bar = progress.find('.bar');
-      canvas = $('canvas').get(0);
+      canvas = $('canvas').addClass('prepared');
       return form.fadeOut(function() {
         return progress.fadeIn(function() {
-          return new GifVJ(canvas, data, {
+          return new GifVJ(canvas.get(0), data, {
             onProgress: function(gifVj, percent) {
               return bar.width(percent + '%');
             },
             onComplete: function(gifVj) {
+              canvas.removeClass('prepared');
               $('#content').fadeOut();
               return gifVj.player.play();
             }

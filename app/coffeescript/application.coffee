@@ -221,13 +221,14 @@ do ->
       form = $('#form-gifs')
       progress = $('.progress')
       bar = progress.find('.bar')
-      canvas = $('canvas').get(0)
+      canvas = $('canvas').addClass('prepared')
       form.fadeOut ->
         progress.fadeIn ->
-          new GifVJ canvas, data,
+          new GifVJ canvas.get(0), data,
             onProgress: (gifVj, percent) ->
               bar.width(percent + '%')
             onComplete: (gifVj) ->
+              canvas.removeClass('prepared')
               $('#content').fadeOut()
               gifVj.player.play()
     error: (e, req) ->
