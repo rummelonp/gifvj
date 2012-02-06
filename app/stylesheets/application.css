@@ -1,19 +1,19 @@
 body {
   font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
 }
-.container.center {
+#content {
   position: absolute;
-  top: 50%;
+  top: 150px;
   left: 50%;
   width: 400px;
   height: 200px;
   margin-left: -200px;
-  margin-top: -200px;
+  text-align: center;
 }
-.container.center h1 {
+#content h1 {
   font-size: 60px;
 }
-.container.center .page-header,
-.container.center .form-inline {
-  text-align: center;
+canvas {
+  width: 100%;
+  height: 100%;
 }
