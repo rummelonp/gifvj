@@ -30,5 +30,9 @@ Padrino.configure_apps do
   set :session_secret, '4a923872c2e2adbeafe3ec670f93ed1032b6a553cd13957976aee5976e0d2715'
 end
 
+Tumblife.configure do |config|
+  config.consumer_key = '*** consumer key ***'
+end
+
 # Mounts the core application for this project
 Padrino.mount("GifVJ").to('/')
