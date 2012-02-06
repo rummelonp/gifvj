@@ -15,13 +15,16 @@ class GifVJ < Padrino::Application
     begin
       @gifs = gifs(params[:name])
       @urls = download(@gifs)
+      if @urls.size == 0
+        halt 400, "Gif Not Found"
+      end
 
       require 'json'
       content_type :json
       @urls.to_json
     rescue
       logger.error $!
-      halt 400
+      halt 400, $!.message
     end
   end
 
@@ -36,9 +39,12 @@ class GifVJ < Padrino::Application
       }.select {|u|
         u.match(/\.gif$/)
       }.uniq
-      break if gifs.size >= 45 || posts.size >= 200
+      break if gifs.size >= 45 ||
+        posts.size >= 200 ||
+        posts.size == 0 ||
+        posts.size % 20 != 0
     end
-    gifs
+    gifs.slice(0, 45)
   end
 
   def download(gifs)

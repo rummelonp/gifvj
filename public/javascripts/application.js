@@ -292,18 +292,31 @@ GifVJ.Player = (function() {
       return $(this).find('input').disableElement();
     },
     success: function(req, data) {
-      var canvas, progressbar;
+      var bar, canvas, form, progress;
+      form = $('#form-gifs');
+      progress = $('.progress');
+      bar = progress.find('.bar');
       canvas = $('canvas').get(0);
-      progressbar = $('.progress').fadeIn().find('.bar');
-      return new GifVJ(canvas, data, {
-        onProgress: function(gifVj, percent) {
-          return progressbar.width(percent + '%');
-        },
-        onComplete: function(gifVj) {
-          $('#content').fadeOut();
-          return gifVj.player.play();
-        }
+      return form.fadeOut(function() {
+        return progress.fadeIn(function() {
+          return new GifVJ(canvas, data, {
+            onProgress: function(gifVj, percent) {
+              return bar.width(percent + '%');
+            },
+            onComplete: function(gifVj) {
+              $('#content').fadeOut();
+              return gifVj.player.play();
+            }
+          });
+        });
       });
+    },
+    error: function(e, req) {
+      var alert;
+      alert = $('#error-alert').text(req.responseText).fadeIn();
+      return setTimeout(function() {
+        return alert.fadeOut();
+      }, 3000);
     },
     complete: function() {
       return $(this).find('input').enableElement();

@@ -218,13 +218,24 @@ do ->
     beforeSend: ->
       $(this).find('input').disableElement()
     success: (req, data) ->
+      form = $('#form-gifs')
+      progress = $('.progress')
+      bar = progress.find('.bar')
       canvas = $('canvas').get(0)
-      progressbar = $('.progress').fadeIn().find('.bar')
-      new GifVJ canvas, data,
-        onProgress: (gifVj, percent) ->
-          progressbar.width(percent + '%')
-        onComplete: (gifVj) ->
-          $('#content').fadeOut()
-          gifVj.player.play()
+      form.fadeOut ->
+        progress.fadeIn ->
+          new GifVJ canvas, data,
+            onProgress: (gifVj, percent) ->
+              bar.width(percent + '%')
+            onComplete: (gifVj) ->
+              $('#content').fadeOut()
+              gifVj.player.play()
+    error: (e, req) ->
+      alert = $('#error-alert')
+        .text(req.responseText)
+        .fadeIn()
+      setTimeout ->
+        alert.fadeOut()
+      , 3000
     complete: ->
       $(this).find('input').enableElement()
