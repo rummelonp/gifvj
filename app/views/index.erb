@@ -3,8 +3,8 @@
     <h1>GifVJ<h1>
   </div>
   <div class="form-inline">
-    <% form_tag :photos do |f| %>
-    <%= input_tag :text, name: :blog_hostname %>
+    <% form_tag :gifs, remote: true do |f| %>
+    <%= input_tag :text, name: :name %>
     <%= submit_tag :start, class: "btn" %>
     <% end %>
   </div>
