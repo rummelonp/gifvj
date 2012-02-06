@@ -4,7 +4,7 @@ guard :less, output: 'app/stylesheets'do
   watch %r{app/less/.+\.less}
 end
 
-guard :coffeescript, output: 'public/javascripts' do
+guard :coffeescript, bare: true, output: 'public/javascripts' do
   watch %r{app/coffeescript/.+\.coffee}
 end
 
