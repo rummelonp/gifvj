@@ -36,6 +36,7 @@ GEM
       em-websocket (>= 0.2.0)
       guard (>= 0.10.0)
       multi_json (~> 1.0.3)
+    hashie (1.2.0)
     http_router (0.10.2)
       rack (>= 1.0.0)
       url_mount (~> 0.2.1)
@@ -50,6 +51,7 @@ GEM
       treetop (~> 1.4.8)
     mime-types (1.17.2)
     multi_json (1.0.4)
+    oauth (0.4.5)
     padrino (0.10.5)
       padrino-admin (= 0.10.5)
       padrino-cache (= 0.10.5)
@@ -99,6 +101,10 @@ GEM
     treetop (1.4.10)
       polyglot
       polyglot (>= 0.3.1)
+    tumblife (1.0.0)
+      activesupport (~> 3.1.3)
+      hashie (~> 1.2.0)
+      oauth (~> 0.4.5)
     url_mount (0.2.1)
       rack
 
@@ -116,3 +122,4 @@ DEPENDENCIES
   rack-less
   rake
   sinatra-flash
+  tumblife

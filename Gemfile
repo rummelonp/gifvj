@@ -11,6 +11,7 @@ gem 'sinatra-flash', :require => 'sinatra/flash'
 # Component requirements
 gem 'rack-less'
 gem 'erubis', "~> 2.7.0"
+gem 'tumblife'
 
 # Development requirements
 group :development do
