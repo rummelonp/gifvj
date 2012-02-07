@@ -33,6 +33,7 @@ class GifVJ < Padrino::Application
       @urls.to_json
     rescue
       logger.error $!
+      logger.flush
       halt 400, $!.message
     end
   end
@@ -41,6 +42,7 @@ class GifVJ < Padrino::Application
     blog_hostname, gifs, posts, offset = "#{name}.tumblr.com", [], [], 0
     loop do
       logger.info "gifs: #{blog_hostname}, #{posts.size}"
+      logger.flush
       data = Tumblife.client.posts(blog_hostname, type: :photo, offset: offset)
       posts += data.posts
       gifs = posts.map {|p|
@@ -67,6 +69,7 @@ class GifVJ < Padrino::Application
         next
       end
       logger.info "download: download #{gif}"
+      logger.flush
       threads << Thread.new do
         begin
           data = open(gif, 'rb').read
