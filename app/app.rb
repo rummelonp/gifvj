@@ -39,7 +39,7 @@ class GifVJ < Padrino::Application
       logger.info "gifs: #{blog_hostname}, #{posts.size}"
       data = Tumblife.client.posts(blog_hostname, type: :photo, offset: posts.size)
       posts += data.posts
-      gifs += posts.map {|p|
+      gifs = posts.map {|p|
         p.photos.first.original_size.url
       }.select {|u|
         u.match(/\.gif$/)
