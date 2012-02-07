@@ -115,7 +115,7 @@ GifVJ = (function() {
       width: parser.header.width,
       height: parser.header.height
     });
-    percent = Math.round(this.datas.length / this.parsers.length * 100);
+    percent = Math.round(this.datas.length / this.urls.length * 100);
     this.handler.onProgress && this.handler.onProgress(this, percent);
     return this.initPlayerIfCompleted();
   };

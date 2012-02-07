@@ -83,7 +83,7 @@ class GifVJ
       frames: parser.frames
       width: parser.header.width
       height: parser.header.height
-    percent = Math.round(@datas.length / @parsers.length * 100)
+    percent = Math.round(@datas.length / @urls.length * 100)
     @handler.onProgress && @handler.onProgress this, percent
     @initPlayerIfCompleted()
 
