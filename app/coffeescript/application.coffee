@@ -293,6 +293,7 @@ $ ->
           bar.width(percent + '%')
         onComplete: (gifVj) ->
           setTimeout ->
+            $('nav').fadeOut()
             $('#content').fadeOut()
           , 0
           canvas.removeClass('prepared')
@@ -314,3 +315,8 @@ $ ->
       , 3000
     complete: ->
       $(this).find('input').enableElement()
+
+  $(document).keydown (e) ->
+    return if $(e.target).isInput()
+    if e.which == 191 && e.shiftKey
+      $('#help').modal('toggle')

@@ -6,6 +6,7 @@
     <%= stylesheet_link_tag "http://twitter.github.com/bootstrap/assets/css/bootstrap.css" %>
     <%= stylesheet_link_tag "application" %>
     <%= javascript_include_tag "http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" %>
+    <%= javascript_include_tag "http://twitter.github.com/bootstrap/assets/js/bootstrap-modal.js" %>
     <%= javascript_include_tag "jquery-ujs" %>
     <!--[if IE]>
       <%= javascript_include_tag "http://html5shiv.googlecode.com/svn/trunk/html5.js" %>
@@ -13,6 +14,38 @@
     <%= javascript_include_tag "gif", "application" %>
   </head>
   <body>
+    <nav>
+      <a href="#help" class="help" data-toggle="modal">About</a>
+    </nav>
+    <div id="help" class="modal fade hide">
+      <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+        <h2>About GifVJ</h2>
+      </div>
+      <div class="modal-body">
+        <p></p>
+        <p>Inspire from <%= link_to "http://bimyoo.tumblr.com/post/16857625080/gifvj1-0-processing-gifvj" %></p>
+        <h3>Keyboard shoutcuts</h3>
+        <dl>
+          <dt>enter</dt>
+          <dd>start / stop animation</dd>
+          <dt>j/→</dt>
+          <dd>next frame</dd>
+          <dt>k/←</dt>
+          <dd>previous frame</dd>
+          <dt>r</dt>
+          <dd>reverse</dd>
+          <dt>space</dt>
+          <dd>rhythm synchronization</dd>
+          <dt>y/u/i/o/p</dt>
+          <dd>select block</dd>
+          <dt>1-9</dt>
+          <dd>select animation</dd>
+          <dt>?</dt>
+          <dd>show this</dd>
+        </dl>
+      </div>
+    </div>
     <%= yield %>
   </body>
 </html>

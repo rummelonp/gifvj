@@ -5,7 +5,7 @@
     </div>
     <div id="form-gifs" class="form-inline">
       <% form_tag :gifs, remote: true do |f| %>
-      <%= input_tag :text, name: :name %>
+      <%= input_tag :text, name: :name, placeholder: "Enter Tumblr User Here" %>
       <%= submit_tag :start, class: "btn" %>
       <% end %>
     </div>

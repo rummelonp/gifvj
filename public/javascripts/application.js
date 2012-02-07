@@ -411,6 +411,7 @@ $(function() {
         },
         onComplete: function(gifVj) {
           setTimeout(function() {
+            $('nav').fadeOut();
             return $('#content').fadeOut();
           }, 0);
           canvas.removeClass('prepared');
@@ -420,7 +421,7 @@ $(function() {
       });
     }, 0);
   };
-  return $('#form-gifs').bindAjaxHandler({
+  $('#form-gifs').bindAjaxHandler({
     beforeSend: function() {
       return $(this).find('input').disableElement();
     },
@@ -437,5 +438,9 @@ $(function() {
     complete: function() {
       return $(this).find('input').enableElement();
     }
+  });
+  return $(document).keydown(function(e) {
+    if ($(e.target).isInput()) return;
+    if (e.which === 191 && e.shiftKey) return $('#help').modal('toggle');
   });
 });
