@@ -1,10 +1,10 @@
 notification :growl
 
-guard :less, output: 'app/stylesheets'do
+guard :less, output: 'public/stylesheets'do
   watch %r{app/less/.+\.less}
 end
 
-guard :coffeescript, bare: true, output: 'public/javascripts' do
+guard :coffeescript, output: 'public/javascripts', bare: true do
   watch %r{app/coffeescript/.+\.coffee}
 end
 

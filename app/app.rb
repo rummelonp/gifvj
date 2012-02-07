@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
+
 require 'open-uri'
 
 class GifVJ < Padrino::Application
-  register LessInitializer
   register Padrino::Rendering
   register Padrino::Helpers
 
@@ -20,7 +21,6 @@ class GifVJ < Padrino::Application
 
       @gifs = GifVJ.cache.get @name
       unless @gifs
-        require 'active_support/core_ext'
         @gifs = gifs @name
         GifVJ.cache.set @name, @gifs, expires_in: 1.hour
       end
@@ -29,7 +29,6 @@ class GifVJ < Padrino::Application
         raise "Gif Not Found"
       end
 
-      require 'json'
       content_type :json
       @urls.to_json
     rescue

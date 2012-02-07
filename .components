@@ -4,4 +4,4 @@
 :mock: none
 :script: none
 :renderer: erb
-:stylesheet: less
+:stylesheet: none
