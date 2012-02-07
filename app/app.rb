@@ -18,7 +18,12 @@ class GifVJ < Padrino::Application
         raise "Bad Blog Name"
       end
 
-      @gifs = gifs @name
+      @gifs = GifVJ.cache.get @name
+      unless @gifs
+        require 'active_support/core_ext'
+        @gifs = gifs @name
+        GifVJ.cache.set @name, @gifs, expires_in: 1.hour
+      end
       @urls = download @gifs
       if @urls.size == 0
         raise "Gif Not Found"
