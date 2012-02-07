@@ -16,11 +16,13 @@ body {
   }
 }
 
-canvas {
-  width: 100%;
-  height: 100%;
-  &.prepared {
-    opacity: 0.3;
-    filter: alpha(opacity=30);
+#canvas {
+  overflow-y: hidden;
+  canvas {
+    width: 100%;
+    &.prepared {
+      opacity: 0.3;
+      filter: alpha(opacity=30);
+    }
   }
 }

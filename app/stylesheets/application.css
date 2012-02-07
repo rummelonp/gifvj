@@ -14,11 +14,13 @@ body {
 #content h1 {
   font-size: 60px;
 }
-canvas {
-  width: 100%;
-  height: 100%;
+#canvas {
+  overflow-y: hidden;
 }
-canvas.prepared {
+#canvas canvas {
+  width: 100%;
+}
+#canvas canvas.prepared {
   opacity: 0.3;
   filter: alpha(opacity=30);
 }

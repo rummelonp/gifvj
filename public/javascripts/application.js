@@ -366,14 +366,22 @@ GifVJ.Player = (function() {
 $(function() {
   var startGifVJ;
   startGifVJ = function(data) {
-    var bar, canvas, form, progress;
+    var $w, bar, canvas, container, form, progress, resizeContainer;
+    $w = $(window);
+    container = $('#canvas');
     form = $('#form-gifs');
     progress = $('.progress');
     bar = progress.find('.bar');
     canvas = $('canvas').addClass('prepared');
+    resizeContainer = function() {
+      container.width($w.width());
+      return container.height($w.height());
+    };
     form.fadeOut(function() {
       return progress.fadeIn();
     });
+    resizeContainer();
+    $w.resize(resizeContainer);
     return setTimeout(function() {
       return new GifVJ(canvas.get(0), data, {
         onProgress: function(gifVj, percent) {

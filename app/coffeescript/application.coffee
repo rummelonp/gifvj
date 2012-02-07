@@ -260,12 +260,23 @@ class GifVJ.Player
 
 $ ->
   startGifVJ = (data) ->
+    $w = $(window)
+    container = $('#canvas')
     form = $('#form-gifs')
     progress = $('.progress')
     bar = progress.find('.bar')
     canvas = $('canvas').addClass('prepared')
+
+    resizeContainer = ->
+      container.width $w.width()
+      container.height $w.height()
+
     form.fadeOut ->
       progress.fadeIn()
+
+    resizeContainer()
+    $w.resize resizeContainer
+
     setTimeout ->
       new GifVJ canvas.get(0), data,
         onProgress: (gifVj, percent) ->
