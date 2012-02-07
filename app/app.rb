@@ -40,8 +40,8 @@ class GifVJ < Padrino::Application
       data = Tumblife.client.posts(blog_hostname, type: :photo, offset: posts.size)
       posts += data.posts
       gifs = posts.map {|p|
-        p.photos.first.original_size.url
-      }.select {|u|
+        p.photos.map{|i| i.original_size.url}
+      }.flatten.select {|u|
         u.match(/\.gif$/)
       }.uniq
       break if gifs.size >= 45 ||
