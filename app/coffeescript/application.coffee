@@ -35,7 +35,7 @@ $.extend $.Event.prototype, hasModifierKey: ->
   return this.altKey || this.ctlrKey || this.metaKey || this.shiftKey
 
 ###
-# GifJV Class
+# GifVJ Class
 ###
 class GifVJ
   constructor: (canvas, urls, handler) ->
@@ -64,9 +64,11 @@ class GifVJ
           parser = new GifVJ.Parser data, null, self.parserHandler
           self.parsers.push parser
 
-  playIfComplete: ->
+  initPlayerIfCompleted: ->
     return unless @datas.length + @errors.length == @parsers.length
-    @player = new GifVJ.Player(@canvas, @datas[0])
+    @slot = 0
+    @number = 0
+    @player = new GifVJ.Player(@canvas, @datas[@slot + @number])
     @handler.onComplete && @handler.onComplete this
 
   onParseProgress: (parser) ->
@@ -83,12 +85,55 @@ class GifVJ
       height: parser.header.height
     percent = Math.round(@datas.length / @parsers.length * 100)
     @handler.onProgress && @handler.onProgress this, percent
-    @playIfComplete()
+    @initPlayerIfCompleted()
 
   onParseError: (parser, error) ->
     @errors.push error
     @handler.onError && @handler.onError this, error
-    @playIfComplete()
+    @initPlayerIfCompleted()
+
+  onKeyDown: (e) ->
+    return unless @player
+    return if $(e.target).isInput()
+    return if e.hasModifierKey()
+    e.preventDefault()
+    switch e.which
+      when 13 # Enter
+        @player.toggle()
+      when 39, 74 # j / →
+        @player.nextFrame()
+      when 37, 75 # k / ←
+        @player.prevFrame()
+      when 82 # r
+        @player.setReverse !@player.reverse
+      when 32 # Space
+        if @beforeTapTime
+          diffTime = new Date - @beforeTapTime
+          if diffTime <= 2000
+            @player.setDelay diffTime / 8
+        @beforeTapTime = new Date
+      when 49, 50, 51, 52, 53, 54, 55, 56, 57, 89, 85, 73, 79, 80 # 1-9, y, u, i, o, p
+        keycode = e.which
+        if keycode >= 49 && keycode <= 57
+          @number = keycode - 49
+        else
+          switch keycode
+            when 89 then @slot = 9 * 0
+            when 85 then @slot = 9 * 1
+            when 73 then @slot = 9 * 2
+            when 79 then @slot = 9 * 3
+            when 80 then @slot = 9 * 4
+        index = @slot + @number
+        while index >= 0
+          data = @datas[index]
+          if data
+            @player.setData data
+            return
+          index = index - @datas.length
+
+  start: ->
+    return unless @player
+    @player.play()
 
 class GifVJ.Parser
   constructor: (data, canvas, handler) ->
@@ -173,12 +218,12 @@ class GifVJ.Player
     if @reverse
       @index -= 1
       if @index < 0
-        @index = @frame.length - 1
+        @index = @frames.length - 1
     else
       @index += 1
       if @index >= @frames.length
         @index = 0
-    setTimeout($.proxy(@stepFrame, this), @delay)
+    setTimeout $.proxy(@stepFrame, this), @delay
 
   play: ->
     @playing = true
@@ -198,39 +243,47 @@ class GifVJ.Player
     @index += 1
     if @index >= @frames.length
       @index = 0
-    @set()
+    @setFrame()
 
   prevFrame: ->
     return if @playing
     @index -= 1
     if @index < 0
       @index = @frames.length - 1
-    @set()
+    @setFrame()
 
   setReverse: (reverse) ->
-    @revecse = reverse
+    @reverse = reverse
 
   setDelay: (delay) ->
     @delay = delay
 
-do ->
+$ ->
+  startGifVJ = (data) ->
+    form = $('#form-gifs')
+    progress = $('.progress')
+    bar = progress.find('.bar')
+    canvas = $('canvas').addClass('prepared')
+    form.fadeOut ->
+      progress.fadeIn()
+    setTimeout ->
+      new GifVJ canvas.get(0), data,
+        onProgress: (gifVj, percent) ->
+          bar.width(percent + '%')
+        onComplete: (gifVj) ->
+          setTimeout ->
+            $('#content').fadeOut()
+          , 0
+          canvas.removeClass('prepared')
+          $(document).keydown $.proxy(gifVj.onKeyDown, gifVj)
+          gifVj.start()
+    , 0
+
   $('#form-gifs').bindAjaxHandler
     beforeSend: ->
       $(this).find('input').disableElement()
     success: (req, data) ->
-      form = $('#form-gifs')
-      progress = $('.progress')
-      bar = progress.find('.bar')
-      canvas = $('canvas').addClass('prepared')
-      form.fadeOut ->
-        progress.fadeIn ->
-          new GifVJ canvas.get(0), data,
-            onProgress: (gifVj, percent) ->
-              bar.width(percent + '%')
-            onComplete: (gifVj) ->
-              canvas.removeClass('prepared')
-              $('#content').fadeOut()
-              gifVj.player.play()
+      startGifVJ(data)
     error: (e, req) ->
       alert = $('#error-alert')
         .text(req.responseText)

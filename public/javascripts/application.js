@@ -46,7 +46,7 @@ $.extend($.Event.prototype, {
     return this.altKey || this.ctlrKey || this.metaKey || this.shiftKey;
   }
   /*
-  # GifJV Class
+  # GifVJ Class
   */
 });
 
@@ -91,9 +91,11 @@ GifVJ = (function() {
     return _results;
   };
 
-  GifVJ.prototype.playIfComplete = function() {
+  GifVJ.prototype.initPlayerIfCompleted = function() {
     if (this.datas.length + this.errors.length !== this.parsers.length) return;
-    this.player = new GifVJ.Player(this.canvas, this.datas[0]);
+    this.slot = 0;
+    this.number = 0;
+    this.player = new GifVJ.Player(this.canvas, this.datas[this.slot + this.number]);
     return this.handler.onComplete && this.handler.onComplete(this);
   };
 
@@ -115,13 +117,88 @@ GifVJ = (function() {
     });
     percent = Math.round(this.datas.length / this.parsers.length * 100);
     this.handler.onProgress && this.handler.onProgress(this, percent);
-    return this.playIfComplete();
+    return this.initPlayerIfCompleted();
   };
 
   GifVJ.prototype.onParseError = function(parser, error) {
     this.errors.push(error);
     this.handler.onError && this.handler.onError(this, error);
-    return this.playIfComplete();
+    return this.initPlayerIfCompleted();
+  };
+
+  GifVJ.prototype.onKeyDown = function(e) {
+    var data, diffTime, index, keycode;
+    if (!this.player) return;
+    if ($(e.target).isInput()) return;
+    if (e.hasModifierKey()) return;
+    e.preventDefault();
+    switch (e.which) {
+      case 13:
+        return this.player.toggle();
+      case 39:
+      case 74:
+        return this.player.nextFrame();
+      case 37:
+      case 75:
+        return this.player.prevFrame();
+      case 82:
+        return this.player.setReverse(!this.player.reverse);
+      case 32:
+        if (this.beforeTapTime) {
+          diffTime = new Date - this.beforeTapTime;
+          if (diffTime <= 2000) this.player.setDelay(diffTime / 8);
+        }
+        return this.beforeTapTime = new Date;
+      case 49:
+      case 50:
+      case 51:
+      case 52:
+      case 53:
+      case 54:
+      case 55:
+      case 56:
+      case 57:
+      case 89:
+      case 85:
+      case 73:
+      case 79:
+      case 80:
+        keycode = e.which;
+        if (keycode >= 49 && keycode <= 57) {
+          this.number = keycode - 49;
+        } else {
+          switch (keycode) {
+            case 89:
+              this.slot = 9 * 0;
+              break;
+            case 85:
+              this.slot = 9 * 1;
+              break;
+            case 73:
+              this.slot = 9 * 2;
+              break;
+            case 79:
+              this.slot = 9 * 3;
+              break;
+            case 80:
+              this.slot = 9 * 4;
+          }
+        }
+        index = this.slot + this.number;
+        while (index >= 0) {
+          data = this.datas[index];
+          if (data) {
+            this.player.setData(data);
+            return;
+          }
+          index = index - this.datas.length;
+        }
+    }
+  };
+
+  GifVJ.prototype.start = function() {
+    if (!this.player) return;
+    return this.player.play();
   };
 
   return GifVJ;
@@ -235,7 +312,7 @@ GifVJ.Player = (function() {
     this.setFrame();
     if (this.reverse) {
       this.index -= 1;
-      if (this.index < 0) this.index = this.frame.length - 1;
+      if (this.index < 0) this.index = this.frames.length - 1;
     } else {
       this.index += 1;
       if (this.index >= this.frames.length) this.index = 0;
@@ -264,18 +341,18 @@ GifVJ.Player = (function() {
     if (this.playing) return;
     this.index += 1;
     if (this.index >= this.frames.length) this.index = 0;
-    return this.set();
+    return this.setFrame();
   };
 
   Player.prototype.prevFrame = function() {
     if (this.playing) return;
     this.index -= 1;
     if (this.index < 0) this.index = this.frames.length - 1;
-    return this.set();
+    return this.setFrame();
   };
 
   Player.prototype.setReverse = function(reverse) {
-    return this.revecse = reverse;
+    return this.reverse = reverse;
   };
 
   Player.prototype.setDelay = function(delay) {
@@ -286,31 +363,39 @@ GifVJ.Player = (function() {
 
 })();
 
-(function() {
+$(function() {
+  var startGifVJ;
+  startGifVJ = function(data) {
+    var bar, canvas, form, progress;
+    form = $('#form-gifs');
+    progress = $('.progress');
+    bar = progress.find('.bar');
+    canvas = $('canvas').addClass('prepared');
+    form.fadeOut(function() {
+      return progress.fadeIn();
+    });
+    return setTimeout(function() {
+      return new GifVJ(canvas.get(0), data, {
+        onProgress: function(gifVj, percent) {
+          return bar.width(percent + '%');
+        },
+        onComplete: function(gifVj) {
+          setTimeout(function() {
+            return $('#content').fadeOut();
+          }, 0);
+          canvas.removeClass('prepared');
+          $(document).keydown($.proxy(gifVj.onKeyDown, gifVj));
+          return gifVj.start();
+        }
+      });
+    }, 0);
+  };
   return $('#form-gifs').bindAjaxHandler({
     beforeSend: function() {
       return $(this).find('input').disableElement();
     },
     success: function(req, data) {
-      var bar, canvas, form, progress;
-      form = $('#form-gifs');
-      progress = $('.progress');
-      bar = progress.find('.bar');
-      canvas = $('canvas').addClass('prepared');
-      return form.fadeOut(function() {
-        return progress.fadeIn(function() {
-          return new GifVJ(canvas.get(0), data, {
-            onProgress: function(gifVj, percent) {
-              return bar.width(percent + '%');
-            },
-            onComplete: function(gifVj) {
-              canvas.removeClass('prepared');
-              $('#content').fadeOut();
-              return gifVj.player.play();
-            }
-          });
-        });
-      });
+      return startGifVJ(data);
     },
     error: function(e, req) {
       var alert;
@@ -323,4 +408,4 @@ GifVJ.Player = (function() {
       return $(this).find('input').enableElement();
     }
   });
-})();
+});
