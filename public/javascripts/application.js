@@ -291,7 +291,11 @@ GifVJ.Parser = (function() {
 
   Parser.prototype.onEndOfFile = function() {
     this.pushFrame();
-    return this.handler.onParseComplete && this.handler.onParseComplete(this);
+    if (this.frames.length > 1) {
+      return this.handler.onParseComplete && this.handler.onParseComplete(this);
+    } else {
+      return this.handler.onParseError && this.handler.onParseError(this, new Error('Not a animation GIF file.'));
+    }
   };
 
   return Parser;

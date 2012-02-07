@@ -195,7 +195,10 @@ class GifVJ.Parser
 
   onEndOfFile: ->
     @pushFrame()
-    @handler.onParseComplete && @handler.onParseComplete this
+    if @frames.length > 1
+      @handler.onParseComplete && @handler.onParseComplete this
+    else
+      @handler.onParseError && @handler.onParseError this, new Error 'Not a animation GIF file.'
 
 class GifVJ.Player
   constructor: (canvas, data)->
