@@ -34,10 +34,10 @@ class GifVJ < Padrino::Application
   end
 
   def gifs(name)
-    blog_hostname, gifs, posts = "#{name}.tumblr.com", [], []
+    blog_hostname, gifs, posts, offset = "#{name}.tumblr.com", [], [], 0
     loop do
       logger.info "gifs: #{blog_hostname}, #{posts.size}"
-      data = Tumblife.client.posts(blog_hostname, type: :photo, offset: posts.size)
+      data = Tumblife.client.posts(blog_hostname, type: :photo, offset: offset)
       posts += data.posts
       gifs = posts.map {|p|
         p.photos.map{|i| i.original_size.url}
@@ -46,8 +46,8 @@ class GifVJ < Padrino::Application
       }.uniq
       break if gifs.size >= 45 ||
         posts.size >= 200 ||
-        posts.size == 0 ||
-        posts.size % 20 != 0
+        posts.size == offset
+      offset = posts.size
     end
     gifs.slice(0, 45)
   end
