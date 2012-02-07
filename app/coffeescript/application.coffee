@@ -196,7 +196,6 @@ class GifVJ.Player
     @canvas = canvas
     @context = canvas.getContext('2d')
     @setData data
-    @index = 0
     @playing = false
     @reverse = false
     @delay = 100
@@ -204,8 +203,10 @@ class GifVJ.Player
   setData: (data) ->
     @data = data
     @frames = @data.frames
+    @index = 0
+    @setFrame()
     @canvas.width = @data.width
-    @canvas.heifht = @data.height
+    @canvas.height = @data.height
 
   setFrame: ->
     frame = @frames[@index]

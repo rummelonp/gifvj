@@ -287,7 +287,6 @@ GifVJ.Player = (function() {
     this.canvas = canvas;
     this.context = canvas.getContext('2d');
     this.setData(data);
-    this.index = 0;
     this.playing = false;
     this.reverse = false;
     this.delay = 100;
@@ -296,8 +295,10 @@ GifVJ.Player = (function() {
   Player.prototype.setData = function(data) {
     this.data = data;
     this.frames = this.data.frames;
+    this.index = 0;
+    this.setFrame();
     this.canvas.width = this.data.width;
-    return this.canvas.heifht = this.data.height;
+    return this.canvas.height = this.data.height;
   };
 
   Player.prototype.setFrame = function() {
