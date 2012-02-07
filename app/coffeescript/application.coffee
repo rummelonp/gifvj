@@ -204,9 +204,9 @@ class GifVJ.Player
     @data = data
     @frames = @data.frames
     @index = 0
-    @setFrame()
     @canvas.width = @data.width
     @canvas.height = @data.height
+    setTimeout($.proxy(@setFrame, this), 0)
 
   setFrame: ->
     frame = @frames[@index]

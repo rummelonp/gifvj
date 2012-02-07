@@ -296,9 +296,9 @@ GifVJ.Player = (function() {
     this.data = data;
     this.frames = this.data.frames;
     this.index = 0;
-    this.setFrame();
     this.canvas.width = this.data.width;
-    return this.canvas.height = this.data.height;
+    this.canvas.height = this.data.height;
+    return setTimeout($.proxy(this.setFrame, this), 0);
   };
 
   Player.prototype.setFrame = function() {
