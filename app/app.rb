@@ -13,10 +13,15 @@ class GifVJ < Padrino::Application
 
   post :gifs do
     begin
-      @gifs = gifs(params[:name])
-      @urls = download(@gifs)
+      @name = params[:name]
+      unless @name.to_s.match(/^[\w\d-]+$/)
+        raise "Bad Blog Name"
+      end
+
+      @gifs = gifs @name
+      @urls = download @gifs
       if @urls.size == 0
-        halt 400, "Gif Not Found"
+        raise "Gif Not Found"
       end
 
       require 'json'
