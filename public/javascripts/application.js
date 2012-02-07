@@ -93,9 +93,26 @@ GifVJ = (function() {
 
   GifVJ.prototype.initPlayerIfCompleted = function() {
     if (this.datas.length + this.errors.length !== this.parsers.length) return;
-    this.slot = 0;
-    this.number = 0;
-    this.player = new GifVJ.Player(this.canvas, this.datas[this.slot + this.number]);
+    this.slots = [
+      {
+        offset: 0,
+        index: 0
+      }, {
+        offset: 9,
+        index: 0
+      }, {
+        offset: 18,
+        index: 0
+      }, {
+        offset: 27,
+        index: 0
+      }, {
+        offset: 36,
+        index: 0
+      }
+    ];
+    this.slot = this.slots[0];
+    this.player = new GifVJ.Player(this.canvas, this.datas[this.slot.offset + this.slot.index]);
     return this.handler.onComplete && this.handler.onComplete(this);
   };
 
@@ -165,26 +182,26 @@ GifVJ = (function() {
       case 80:
         keycode = e.which;
         if (keycode >= 49 && keycode <= 57) {
-          this.number = keycode - 49;
+          this.slot.index = keycode - 49;
         } else {
           switch (keycode) {
             case 89:
-              this.slot = 9 * 0;
+              this.slot = this.slots[0];
               break;
             case 85:
-              this.slot = 9 * 1;
+              this.slot = this.slots[1];
               break;
             case 73:
-              this.slot = 9 * 2;
+              this.slot = this.slots[2];
               break;
             case 79:
-              this.slot = 9 * 3;
+              this.slot = this.slots[3];
               break;
             case 80:
-              this.slot = 9 * 4;
+              this.slot = this.slots[4];
           }
         }
-        index = this.slot + this.number;
+        index = this.slot.offset + this.slot.index;
         while (index >= 0) {
           data = this.datas[index];
           if (data) {

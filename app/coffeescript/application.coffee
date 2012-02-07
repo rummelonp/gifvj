@@ -66,9 +66,15 @@ class GifVJ
 
   initPlayerIfCompleted: ->
     return unless @datas.length + @errors.length == @parsers.length
-    @slot = 0
-    @number = 0
-    @player = new GifVJ.Player(@canvas, @datas[@slot + @number])
+    @slots = [
+      {offset: 0,  index: 0}
+      {offset: 9,  index: 0}
+      {offset: 18, index: 0}
+      {offset: 27, index: 0}
+      {offset: 36, index: 0}
+    ]
+    @slot = @slots[0]
+    @player = new GifVJ.Player(@canvas, @datas[@slot.offset + @slot.index])
     @handler.onComplete && @handler.onComplete this
 
   onParseProgress: (parser) ->
@@ -115,15 +121,15 @@ class GifVJ
       when 49, 50, 51, 52, 53, 54, 55, 56, 57, 89, 85, 73, 79, 80 # 1-9, y, u, i, o, p
         keycode = e.which
         if keycode >= 49 && keycode <= 57
-          @number = keycode - 49
+          @slot.index = keycode - 49
         else
           switch keycode
-            when 89 then @slot = 9 * 0
-            when 85 then @slot = 9 * 1
-            when 73 then @slot = 9 * 2
-            when 79 then @slot = 9 * 3
-            when 80 then @slot = 9 * 4
-        index = @slot + @number
+            when 89 then @slot = @slots[0]
+            when 85 then @slot = @slots[1]
+            when 73 then @slot = @slots[2]
+            when 79 then @slot = @slots[3]
+            when 80 then @slot = @slots[4]
+        index = @slot.offset + @slot.index
         while index >= 0
           data = @datas[index]
           if data
