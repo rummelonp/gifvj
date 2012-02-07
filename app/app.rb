@@ -1,3 +1,5 @@
+require 'open-uri'
+
 class GifVJ < Padrino::Application
   register LessInitializer
   register Padrino::Rendering
