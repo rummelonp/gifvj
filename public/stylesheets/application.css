@@ -20,6 +20,9 @@ nav {
 #content h1 {
   font-size: 60px;
 }
+#content .btn {
+  margin-left: 10px;
+}
 #canvas {
   overflow-y: hidden;
 }

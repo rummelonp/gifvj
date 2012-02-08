@@ -5,8 +5,11 @@
     </div>
     <div id="form-gifs" class="form-inline">
       <% form_tag :gifs, remote: true do |f| %>
-      <%= input_tag :text, name: :name, placeholder: "Enter Tumblr User Here" %>
-      <%= submit_tag :start, class: "btn" %>
+      <div class="input-append">
+        <%= input_tag :text, name: :name, value: "gif-vj", class: "span2", placeholder: "Enter Tumblr User Here" %>
+        <span class="add-on">.tumblr.com</span>
+        <%= submit_tag :start, class: "btn" %>
+      </div>
       <% end %>
     </div>
     <div id="error-alert" class="alert alert-error hide">
