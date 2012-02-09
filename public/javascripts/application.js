@@ -438,6 +438,16 @@ $(function() {
     complete: function() {
       return $(this).find('input').enableElement();
     }
+  }).find('input[type="text"]').keyup(function() {
+    var submit, text;
+    text = $(this);
+    if (text.attr('disabled') === 'disabled') return;
+    submit = text.nextAll('input[type="submit"]');
+    if (text.val().length > 0) {
+      return submit.enableElement();
+    } else {
+      return submit.disableElement();
+    }
   });
   return $(document).keydown(function(e) {
     if ($(e.target).isInput()) return;

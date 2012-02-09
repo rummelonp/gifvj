@@ -315,6 +315,14 @@ $ ->
       , 3000
     complete: ->
       $(this).find('input').enableElement()
+  .find('input[type="text"]').keyup ->
+    text = $(this)
+    return if text.attr('disabled') == 'disabled'
+    submit = text.nextAll('input[type="submit"]')
+    if text.val().length > 0
+      submit.enableElement()
+    else
+      submit.disableElement()
 
   $(document).keydown (e) ->
     return if $(e.target).isInput()
