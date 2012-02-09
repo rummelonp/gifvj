@@ -449,8 +449,8 @@ $(function() {
       return submit.disableElement();
     }
   });
-  return $(document).keydown(function(e) {
+  return $(document).keypress(function(e) {
     if ($(e.target).isInput()) return;
-    if (e.which === 191 && e.shiftKey) return $('#help').modal('toggle');
+    if (e.which === 63 && e.shiftKey) return $('#about').modal('toggle');
   });
 });

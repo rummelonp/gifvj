@@ -324,7 +324,7 @@ $ ->
     else
       submit.disableElement()
 
-  $(document).keydown (e) ->
+  $(document).keypress (e) ->
     return if $(e.target).isInput()
-    if e.which == 191 && e.shiftKey
-      $('#help').modal('toggle')
+    if e.which == 63 && e.shiftKey # ?
+      $('#about').modal('toggle')
