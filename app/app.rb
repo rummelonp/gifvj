@@ -6,7 +6,7 @@ class GifVJ < Padrino::Application
   register Padrino::Rendering
   register Padrino::Helpers
 
-  set :cache, Padrino::Cache::Store::Memory.new
+  set :cache, Padrino::Cache::Store::Redis.new(Redis.new)
 
   get :index do
     erb :index

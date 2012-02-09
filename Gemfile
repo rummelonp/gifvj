@@ -7,6 +7,7 @@ gem 'rake'
 gem 'erubis', "~> 2.7.0"
 gem 'tumblife'
 gem 'activesupport', require: 'active_support/core_ext'
+gem 'redis'
 
 # Development requirements
 group :development do
