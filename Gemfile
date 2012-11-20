@@ -4,7 +4,7 @@ source :rubygems
 gem 'rake'
 
 # Component requirements
-gem 'erubis', "~> 2.7.0"
+gem 'erubis', '~> 2.7.0'
 gem 'tumblife'
 gem 'activesupport', require: 'active_support/core_ext'
 gem 'redis'
@@ -19,4 +19,4 @@ group :development do
 end
 
 # Padrino Stable Gem
-gem 'padrino', '0.10.5'
+gem 'padrino', '0.10.7'
