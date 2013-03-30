@@ -1,4 +1,4 @@
-source :rubygems
+source 'https://rubygems.org'
 
 # Project requirements
 gem 'rake'
@@ -19,4 +19,4 @@ group :development do
 end
 
 # Padrino Stable Gem
-gem 'padrino', '0.10.7'
+gem 'padrino', '0.11.0'
