@@ -6,7 +6,7 @@ gem 'rake'
 # Component requirements
 gem 'erubis', '~> 2.7.0'
 gem 'tumblife'
-gem 'activesupport', require: 'active_support/core_ext'
+gem 'activesupport', '3.2.13', require: 'active_support/core_ext'
 gem 'redis-store'
 
 # Development requirements
