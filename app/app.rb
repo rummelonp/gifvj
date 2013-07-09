@@ -9,6 +9,11 @@ class GifVJ < Padrino::Application
   set :cache, Redis::Store.new(namespace: 'gifvj')
 
   get :index do
+    @names = GifVJ.cache.hgetall('gifvj:private:names')
+      .sort_by { |(k, v)| -v.to_i }
+      .take(20)
+      .map(&:first)
+
     erb :index
   end
 
@@ -28,6 +33,7 @@ class GifVJ < Padrino::Application
       if @urls.size == 0
         raise "Gif Not Found"
       end
+      GifVJ.cache.hincrby 'gifvj:private:names', @name, 1
 
       content_type :json
       @urls.to_json
