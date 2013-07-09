@@ -56,6 +56,8 @@ class GifVJ < Padrino::Application
       offset = posts.size
     end
     gifs.slice(0, 45)
+  rescue Tumblife::NotFound
+    []
   end
 
   def download(gifs)
