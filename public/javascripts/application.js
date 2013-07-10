@@ -22,18 +22,21 @@ $document.ready(function() {
     onComplete: function(gifVj) {
       $('nav, #content').fadeOut();
       $canvas.removeClass('prepared');
-      $document.keydown(gifVj.onKeyDown);
       return gifVj.start();
     }
   };
   startGifVJ = function(data) {
+    var gifVj;
+    $container.show();
     $canvas.addClass('prepared');
     $form.fadeOut(function() {
       return $progress.fadeIn();
     });
     resizeContainer();
     $window.resize(resizeContainer);
-    return new GifVJ($canvas.get(0), data, gifVjHandler);
+    gifVj = new GifVJ($canvas.get(0), data, gifVjHandler);
+    $window.resize(gifVj.onResize);
+    return $document.keydown(gifVj.onKeyDown);
   };
   $form.bindAjaxHandler({
     beforeSend: function() {

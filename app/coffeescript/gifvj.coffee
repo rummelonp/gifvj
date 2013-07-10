@@ -23,6 +23,7 @@ class GifVJ
     @canvas.width = parser.header.width
     @canvas.height = parser.header.height
     @context.putImageData frame, 0, 0
+    @resizeCanvas()
 
   onParseComplete: (parser) =>
     @data.push
@@ -58,6 +59,32 @@ class GifVJ
     @player = new GifVJ.Player @, @canvas, @data[@slot.offset + @slot.index]
     if @handler.onComplete
       @handler.onComplete this
+
+  onResize: (e) =>
+    @resizeCanvas()
+
+  resizeCanvas: ->
+    $window = $ window
+    $canvas = $ @canvas
+    windowWidth = $window.width()
+    windowHeight = $window.height()
+    canvasRealWidth = $canvas.attr 'width'
+    canvasRealHeight = $canvas.attr 'height'
+    widthRatio = windowWidth / canvasRealWidth
+    heightRatio = windowHeight / canvasRealHeight
+    if widthRatio < heightRatio
+      ratio = heightRatio
+      $canvas.css
+        left: "-#{(canvasRealWidth * ratio - windowWidth) / 2}px"
+        top: '0px'
+    else
+      ratio = widthRatio
+      $canvas.css
+        left: '0px'
+        top: "-#{(canvasRealHeight * ratio - windowHeight) / 2}px"
+    $canvas.css
+      width: canvasRealWidth * ratio
+      height: canvasRealHeight * ratio
 
   onKeyDown: (e) =>
     return unless @player
@@ -165,6 +192,7 @@ class GifVJ.Player
     @index = 0
     @canvas.width = @data.width
     @canvas.height = @data.height
+    @gifVj.resizeCanvas()
     @setFrame()
 
   setFrame: ->

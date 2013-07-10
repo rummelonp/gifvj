@@ -18,16 +18,18 @@ $document.ready ->
     onComplete: (gifVj) ->
       $('nav, #content').fadeOut()
       $canvas.removeClass 'prepared'
-      $document.keydown gifVj.onKeyDown
       gifVj.start()
 
   startGifVJ = (data) ->
+    $container.show()
     $canvas.addClass 'prepared'
     $form.fadeOut ->
       $progress.fadeIn()
     resizeContainer()
     $window.resize resizeContainer
-    new GifVJ $canvas.get(0), data, gifVjHandler
+    gifVj = new GifVJ $canvas.get(0), data, gifVjHandler
+    $window.resize gifVj.onResize
+    $document.keydown gifVj.onKeyDown
 
   $form.bindAjaxHandler
     beforeSend: ->

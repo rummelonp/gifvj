@@ -13,6 +13,7 @@ GifVJ = (function() {
     this.urls = urls != null ? urls : [];
     this.handler = handler != null ? handler : [];
     this.onKeyDown = __bind(this.onKeyDown, this);
+    this.onResize = __bind(this.onResize, this);
     this.onParseError = __bind(this.onParseError, this);
     this.onParseComplete = __bind(this.onParseComplete, this);
     this.onParseProgress = __bind(this.onParseProgress, this);
@@ -45,7 +46,8 @@ GifVJ = (function() {
     frame = parser.frames[parser.frames.length - 1];
     this.canvas.width = parser.header.width;
     this.canvas.height = parser.header.height;
-    return this.context.putImageData(frame, 0, 0);
+    this.context.putImageData(frame, 0, 0);
+    return this.resizeCanvas();
   };
 
   GifVJ.prototype.onParseComplete = function(parser) {
@@ -105,6 +107,39 @@ GifVJ = (function() {
     if (this.handler.onComplete) {
       return this.handler.onComplete(this);
     }
+  };
+
+  GifVJ.prototype.onResize = function(e) {
+    return this.resizeCanvas();
+  };
+
+  GifVJ.prototype.resizeCanvas = function() {
+    var $canvas, $window, canvasRealHeight, canvasRealWidth, heightRatio, ratio, widthRatio, windowHeight, windowWidth;
+    $window = $(window);
+    $canvas = $(this.canvas);
+    windowWidth = $window.width();
+    windowHeight = $window.height();
+    canvasRealWidth = $canvas.attr('width');
+    canvasRealHeight = $canvas.attr('height');
+    widthRatio = windowWidth / canvasRealWidth;
+    heightRatio = windowHeight / canvasRealHeight;
+    if (widthRatio < heightRatio) {
+      ratio = heightRatio;
+      $canvas.css({
+        left: "-" + ((canvasRealWidth * ratio - windowWidth) / 2) + "px",
+        top: '0px'
+      });
+    } else {
+      ratio = widthRatio;
+      $canvas.css({
+        left: '0px',
+        top: "-" + ((canvasRealHeight * ratio - windowHeight) / 2) + "px"
+      });
+    }
+    return $canvas.css({
+      width: canvasRealWidth * ratio,
+      height: canvasRealHeight * ratio
+    });
   };
 
   GifVJ.prototype.onKeyDown = function(e) {
@@ -291,6 +326,7 @@ GifVJ.Player = (function() {
     this.index = 0;
     this.canvas.width = this.data.width;
     this.canvas.height = this.data.height;
+    this.gifVj.resizeCanvas();
     return this.setFrame();
   };
 
