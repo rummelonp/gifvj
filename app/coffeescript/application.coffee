@@ -2,9 +2,11 @@ $window = $(window)
 $document = $(document)
 
 $document.ready ->
-  $container = $ '#canvas'
+  $container = $ '.canvas-container'
   $canvas = $ 'canvas'
-  $form = $ '#form-gifs'
+  $about = $ '.about'
+  $form = $ 'form'
+  $alert = $ '.alert'
   $progress = $ '.progress'
   $bar = $progress.find '.bar'
 
@@ -16,13 +18,14 @@ $document.ready ->
     onProgress: (gifVj, percent) ->
       $bar.width percent + '%'
     onComplete: (gifVj) ->
-      $('nav, #content').fadeOut()
+      $('nav, .content').fadeOut()
       $canvas.removeClass 'prepared'
       gifVj.start()
 
   startGifVJ = (data) ->
     $container.show()
     $canvas.addClass 'prepared'
+    $alert.fadeOut()
     $form.fadeOut ->
       $progress.fadeIn()
     resizeContainer()
@@ -37,8 +40,7 @@ $document.ready ->
     success: (req, data) ->
       startGifVJ(data)
     error: (e, req) ->
-      $alert = $('#error-alert')
-        .text(req.responseText)
+      $alert.text(req.responseText)
         .fadeIn()
       setTimeout ->
         $alert.fadeOut()
@@ -58,4 +60,4 @@ $document.ready ->
   $document.keypress (e) ->
     return if $(e.target).isInput()
     if e.which == 63 && e.shiftKey # ?
-      $('#about').modal('toggle')
+      $about.modal('toggle')

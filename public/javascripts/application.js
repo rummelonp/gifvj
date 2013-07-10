@@ -5,10 +5,12 @@ $window = $(window);
 $document = $(document);
 
 $document.ready(function() {
-  var $bar, $canvas, $container, $form, $progress, gifVjHandler, resizeContainer, startGifVJ;
-  $container = $('#canvas');
+  var $about, $alert, $bar, $canvas, $container, $form, $progress, gifVjHandler, resizeContainer, startGifVJ;
+  $container = $('.canvas-container');
   $canvas = $('canvas');
-  $form = $('#form-gifs');
+  $about = $('.about');
+  $form = $('form');
+  $alert = $('.alert');
   $progress = $('.progress');
   $bar = $progress.find('.bar');
   resizeContainer = function() {
@@ -20,7 +22,7 @@ $document.ready(function() {
       return $bar.width(percent + '%');
     },
     onComplete: function(gifVj) {
-      $('nav, #content').fadeOut();
+      $('nav, .content').fadeOut();
       $canvas.removeClass('prepared');
       return gifVj.start();
     }
@@ -29,6 +31,7 @@ $document.ready(function() {
     var gifVj;
     $container.show();
     $canvas.addClass('prepared');
+    $alert.fadeOut();
     $form.fadeOut(function() {
       return $progress.fadeIn();
     });
@@ -46,8 +49,7 @@ $document.ready(function() {
       return startGifVJ(data);
     },
     error: function(e, req) {
-      var $alert;
-      $alert = $('#error-alert').text(req.responseText).fadeIn();
+      $alert.text(req.responseText).fadeIn();
       return setTimeout(function() {
         return $alert.fadeOut();
       }, 3000);
@@ -74,7 +76,7 @@ $document.ready(function() {
       return;
     }
     if (e.which === 63 && e.shiftKey) {
-      return $('#about').modal('toggle');
+      return $about.modal('toggle');
     }
   });
 });

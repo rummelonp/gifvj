@@ -1,25 +1,25 @@
 <div class="container">
-  <div id="content">
+  <div class="content">
     <div class="page-header">
       <h1>GifVJ<h1>
     </div>
-    <div id="form-gifs" class="form-inline">
+    <div class="form-inline">
       <% form_tag :gifs, remote: true do |f| %>
-      <div class="input-append">
-        <%= input_tag :text, name: :name, value: "gif-vj", class: "span2 name", placeholder: "Enter Tumblr User" %>
-        <span class="add-on">.tumblr.com</span>
-        <%= submit_tag :start, class: "btn" %>
-      </div>
+        <div class="input-append">
+          <%= input_tag :text, name: :name, value: "gif-vj", class: "span2 name", placeholder: "Enter Tumblr User" %>
+          <span class="add-on">.tumblr.com</span>
+          <%= submit_tag :start, class: "btn" %>
+        </div>
       <% end %>
     </div>
-    <div id="error-alert" class="alert alert-error hide">
+    <div class="alert alert-error hide">
     </div>
-    <div id="gifs-progress" class="progress progress-info progress-striped active hide">
+    <div class="progress progress-info progress-striped active hide">
       <div class="bar" style="width: 0%"></div>
     </div>
   </div>
 </div>
-<div id="canvas" class="hide">
+<div class="canvas-container hide">
   <canvas />
 </div>
 <script>

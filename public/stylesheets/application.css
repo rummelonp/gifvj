@@ -7,7 +7,7 @@ nav {
   right: 20px;
   z-index: 100;
 }
-#content {
+.content {
   position: absolute;
   top: 150px;
   left: 50%;
@@ -17,20 +17,20 @@ nav {
   margin-left: -200px;
   text-align: center;
 }
-#content h1 {
+.content h1 {
   font-size: 60px;
 }
-#content .btn {
+.content .btn {
   margin-left: 10px;
 }
-#canvas {
+.canvas-container {
   overflow-y: hidden;
 }
-#canvas canvas {
+.canvas-container canvas {
   position: relative;
   width: 100%;
 }
-#canvas canvas.prepared {
+.canvas-container canvas.prepared {
   opacity: 0.3;
   filter: alpha(opacity=30);
 }
