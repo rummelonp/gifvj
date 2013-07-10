@@ -27,7 +27,7 @@ $.fn.extend
       $.rails.stopEverything(e)
   bindAjaxHandler: (handlers) ->
     for eventName, handler of handlers
-      this.live 'ajax:' + eventName, handler
+      this.on 'ajax:' + eventName, handler
     this
 
 # Add methods to Event

@@ -34,7 +34,7 @@ $.fn.extend({
     var eventName, handler;
     for (eventName in handlers) {
       handler = handlers[eventName];
-      this.live('ajax:' + eventName, handler);
+      this.on('ajax:' + eventName, handler);
     }
     return this;
   }
