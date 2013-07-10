@@ -2,34 +2,51 @@
 # GifVJ Class
 ###
 class GifVJ
-  constructor: (canvas, urls, handler) ->
-    @canvas = canvas
+  constructor: (@canvas, @urls = [], @handler = []) ->
     @context = @canvas.getContext '2d'
-    @urls = urls
-    @handler = handler || {}
     @parsers = []
-    @datas = []
+    @data = []
     @errors = []
-    @parserHandler =
-      onParseProgress: $.proxy(@onParseProgress, this)
-      onParseComplete: $.proxy(@onParseComplete, this)
-      onParseError: $.proxy(@onParseError, this)
-    @load()
-
-  load: ->
-    self = this
+    beforeSend = (req) =>
+      req.overrideMimeType 'text/plain; charset=x-user-defined'
+    complete = (req) =>
+      @parsers.push new GifVJ.Parser @, req.responseText
     for url in @urls
       $.ajax
         url: url
-        beforeSend: (req) ->
-          req.overrideMimeType 'text/plain; charset=x-user-defined'
-        complete: (req) ->
-          data = req.responseText
-          parser = new GifVJ.Parser data, null, self.parserHandler
-          self.parsers.push parser
+        beforeSend: beforeSend
+        complete: complete
 
-  initPlayerIfCompleted: ->
-    return unless @datas.length + @errors.length == @parsers.length
+  onParseProgress: (parser) =>
+    return unless parser.frames.length > 0
+    frame = parser.frames[parser.frames.length - 1]
+    @canvas.width = parser.header.width
+    @canvas.height = parser.header.height
+    @context.putImageData frame, 0, 0
+
+  onParseComplete: (parser) =>
+    @data.push
+      frames: parser.frames
+      width: parser.header.width
+      height: parser.header.height
+    percent = Math.round @data.length / @urls.length * 100
+    if @handler.onProgress
+      @handler.onProgress this, percent
+    if @isCompleted()
+      @initPlayer()
+
+  onParseError: (parser, error) =>
+    @errors.push error
+    if @handler.onError
+      @handler.onError this, error
+    if @isCompleted()
+      @initPlayer()
+
+  isCompleted: ->
+    @data.length + @errors.length == @parsers.length
+
+  initPlayer: ->
+    return unless @isCompleted()
     @slots = [
       {offset: 0,  index: 0}
       {offset: 9,  index: 0}
@@ -38,31 +55,11 @@ class GifVJ
       {offset: 36, index: 0}
     ]
     @slot = @slots[0]
-    @player = new GifVJ.Player(@canvas, @datas[@slot.offset + @slot.index])
-    @handler.onComplete && @handler.onComplete this
+    @player = new GifVJ.Player @, @canvas, @data[@slot.offset + @slot.index]
+    if @handler.onComplete
+      @handler.onComplete this
 
-  onParseProgress: (parser) ->
-    return unless parser.frames.length > 0
-    frame = parser.frames[parser.frames.length - 1]
-    @canvas.width = parser.header.width
-    @canvas.height = parser.header.height
-    @context.putImageData(frame, 0, 0)
-
-  onParseComplete: (parser) ->
-    @datas.push
-      frames: parser.frames
-      width: parser.header.width
-      height: parser.header.height
-    percent = Math.round(@datas.length / @urls.length * 100)
-    @handler.onProgress && @handler.onProgress this, percent
-    @initPlayerIfCompleted()
-
-  onParseError: (parser, error) ->
-    @errors.push error
-    @handler.onError && @handler.onError this, error
-    @initPlayerIfCompleted()
-
-  onKeyDown: (e) ->
+  onKeyDown: (e) =>
     return unless @player
     return if $(e.target).isInput()
     return if e.hasModifierKey()
@@ -75,16 +72,16 @@ class GifVJ
       when 37, 75 # k / ←
         @player.prevFrame()
       when 82 # r
-        @player.setReverse !@player.reverse
+        @player.toggleReverse()
       when 32 # Space
-        if @beforeTapTime
-          diffTime = new Date - @beforeTapTime
+        if @beforeTime
+          diffTime = new Date - @beforeTime
           if diffTime <= 2000
             @player.setDelay diffTime / 8
-        @beforeTapTime = new Date
+        @beforeTime = new Date
       when 49, 50, 51, 52, 53, 54, 55, 56, 57, 89, 85, 73, 79, 80 # 1-9, y, u, i, o, p
         keycode = e.which
-        if keycode >= 49 && keycode <= 57
+        if 49 <= keycode <= 57
           @slot.index = keycode - 49
         else
           switch keycode
@@ -95,98 +92,87 @@ class GifVJ
             when 80 then @slot = @slots[4]
         index = @slot.offset + @slot.index
         while index >= 0
-          data = @datas[index]
-          if data
-            @player.setData data
+          if datum = @data[index]
+            @player.setData datum
             return
-          index = index - @datas.length
+          index = index - @data.length
 
   start: ->
     return unless @player
     @player.play()
 
 class GifVJ.Parser
-  constructor: (data, canvas, handler) ->
-    @stream = new Stream(data)
-    @canvas = canvas || document.createElement 'canvas'
-    @handler = handler || {}
+  constructor: (@gifVj, data) ->
+    @canvas = document.createElement 'canvas'
     @frames = []
-    @parse()
-
-  parse: ->
     try
-      parseGIF @stream,
-        hdr: $.proxy(@onParseHeader, this)
-        gce: $.proxy(@onParseGraphicControlExtension, this)
-        img: $.proxy(@onParseImage, this)
-        eof: $.proxy(@onEndOfFile, this)
+      parseGIF new Stream(data),
+        hdr: @onParseHeader
+        gce: @onParseGraphicControlExtension
+        img: @onParseImage
+        eof: @onEndOfFile
     catch error
-      if @handler.onParseError
-        @handler.onParseError this, error
-      else
-        throw error
+      @gifVj.onParseError this, error
 
   pushFrame: ->
     if @context
-      @frames.push @context.getImageData(0, 0, @header.width, @header.height)
+      @frames.push @context.getImageData 0, 0, @header.width, @header.height
       @context = null
 
-  onParseHeader: (header) ->
+  onParseHeader: (header) =>
     @header = header
     @canvas.width = @header.width
     @canvas.height = @header.height
 
-  onParseGraphicControlExtension: (gce) ->
+  onParseGraphicControlExtension: (gce) =>
     @pushFrame()
     @transparency = if gce.transparencyGiven then gce.transparencyIndex else null
-    @disposal_method = gce.disposalMethod
+    @disposalMethod = gce.disposalMethod
 
-  onParseImage: (image) ->
+  onParseImage: (image) =>
     unless @context
       @context = @canvas.getContext '2d'
-    color_table = if image.lctFlag then image.lct else @header.gct
-    data = @context.getImageData(image.leftPos, image.topPos, image.width, image.height)
+    colorTable = if image.lctFlag then image.lct else @header.gct
+    imageData = @context.getImageData image.leftPos, image.topPos, image.width, image.height
     for pixel, index in image.pixels
       if @transparency != pixel
-        data.data[index * 4 + 0] = color_table[pixel][0]
-        data.data[index * 4 + 1] = color_table[pixel][1]
-        data.data[index * 4 + 2] = color_table[pixel][2]
-        data.data[index * 4 + 3] = 255
-      else if @disposal_method == 2 || @disposal_method == 3
-        data.data[index * 4 + 3] = 0
-    @context.putImageData(data, image.leftPos, image.topPos)
-    @handler.onParseProgress && @handler.onParseProgress this
+        imageData.data[index * 4 + 0] = colorTable[pixel][0]
+        imageData.data[index * 4 + 1] = colorTable[pixel][1]
+        imageData.data[index * 4 + 2] = colorTable[pixel][2]
+        imageData.data[index * 4 + 3] = 255
+      else if @disposalMethod == 2 || @disposalMethod == 3
+        imageData.data[index * 4 + 3] = 0
+    @context.putImageData imageData, image.leftPos, image.topPos
+    @gifVj.onParseProgress this
 
-  onEndOfFile: ->
+  onEndOfFile: =>
     @pushFrame()
     if @frames.length > 1
-      @handler.onParseComplete && @handler.onParseComplete this
+      @gifVj.onParseComplete this
     else
-      @handler.onParseError && @handler.onParseError this, new Error 'Not a animation GIF file.'
+      @gifVj.onParseError this, new Error 'Not a animation GIF file.'
 
 class GifVJ.Player
-  constructor: (canvas, data)->
-    @canvas = canvas
-    @context = canvas.getContext('2d')
-    @setData data
+  constructor: (@gifVj, @canvas, datum)->
+    @context = canvas.getContext '2d'
+    @setData datum
     @playing = false
     @reverse = false
     @delay = 100
 
-  setData: (data) ->
-    @data = data
+  setData: (@data) ->
     @frames = @data.frames
     @index = 0
     @canvas.width = @data.width
     @canvas.height = @data.height
-    setTimeout($.proxy(@setFrame, this), 0)
+    @setFrame()
 
   setFrame: ->
     frame = @frames[@index]
     return unless frame
-    @context.putImageData(frame, 0, 0)
+    @context.putImageData frame, 0, 0
 
-  stepFrame: ->
+  stepFrame: =>
     return unless @playing
     @setFrame()
     if @reverse
@@ -197,7 +183,7 @@ class GifVJ.Player
       @index += 1
       if @index >= @frames.length
         @index = 0
-    setTimeout $.proxy(@stepFrame, this), @delay
+    setTimeout @stepFrame, @delay
 
   play: ->
     @playing = true
@@ -226,8 +212,9 @@ class GifVJ.Player
       @index = @frames.length - 1
     @setFrame()
 
-  setReverse: (reverse) ->
-    @reverse = reverse
+  toggleReverse: ->
+    @setReverse !@reverse
 
-  setDelay: (delay) ->
-    @delay = delay
+  setReverse: (@reverse) ->
+
+  setDelay: (@delay) ->

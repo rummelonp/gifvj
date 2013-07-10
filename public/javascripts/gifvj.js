@@ -2,50 +2,84 @@
 # GifVJ Class
 */
 
-var GifVJ;
+var GifVJ,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 GifVJ = (function() {
   function GifVJ(canvas, urls, handler) {
+    var beforeSend, complete, url, _i, _len, _ref,
+      _this = this;
     this.canvas = canvas;
+    this.urls = urls != null ? urls : [];
+    this.handler = handler != null ? handler : [];
+    this.onKeyDown = __bind(this.onKeyDown, this);
+    this.onParseError = __bind(this.onParseError, this);
+    this.onParseComplete = __bind(this.onParseComplete, this);
+    this.onParseProgress = __bind(this.onParseProgress, this);
     this.context = this.canvas.getContext('2d');
-    this.urls = urls;
-    this.handler = handler || {};
     this.parsers = [];
-    this.datas = [];
+    this.data = [];
     this.errors = [];
-    this.parserHandler = {
-      onParseProgress: $.proxy(this.onParseProgress, this),
-      onParseComplete: $.proxy(this.onParseComplete, this),
-      onParseError: $.proxy(this.onParseError, this)
+    beforeSend = function(req) {
+      return req.overrideMimeType('text/plain; charset=x-user-defined');
     };
-    this.load();
-  }
-
-  GifVJ.prototype.load = function() {
-    var self, url, _i, _len, _ref, _results;
-    self = this;
+    complete = function(req) {
+      return _this.parsers.push(new GifVJ.Parser(_this, req.responseText));
+    };
     _ref = this.urls;
-    _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       url = _ref[_i];
-      _results.push($.ajax({
+      $.ajax({
         url: url,
-        beforeSend: function(req) {
-          return req.overrideMimeType('text/plain; charset=x-user-defined');
-        },
-        complete: function(req) {
-          var data, parser;
-          data = req.responseText;
-          parser = new GifVJ.Parser(data, null, self.parserHandler);
-          return self.parsers.push(parser);
-        }
-      }));
+        beforeSend: beforeSend,
+        complete: complete
+      });
     }
-    return _results;
+  }
+
+  GifVJ.prototype.onParseProgress = function(parser) {
+    var frame;
+    if (!(parser.frames.length > 0)) {
+      return;
+    }
+    frame = parser.frames[parser.frames.length - 1];
+    this.canvas.width = parser.header.width;
+    this.canvas.height = parser.header.height;
+    return this.context.putImageData(frame, 0, 0);
   };
 
-  GifVJ.prototype.initPlayerIfCompleted = function() {
-    if (this.datas.length + this.errors.length !== this.parsers.length) {
+  GifVJ.prototype.onParseComplete = function(parser) {
+    var percent;
+    this.data.push({
+      frames: parser.frames,
+      width: parser.header.width,
+      height: parser.header.height
+    });
+    percent = Math.round(this.data.length / this.urls.length * 100);
+    if (this.handler.onProgress) {
+      this.handler.onProgress(this, percent);
+    }
+    if (this.isCompleted()) {
+      return this.initPlayer();
+    }
+  };
+
+  GifVJ.prototype.onParseError = function(parser, error) {
+    this.errors.push(error);
+    if (this.handler.onError) {
+      this.handler.onError(this, error);
+    }
+    if (this.isCompleted()) {
+      return this.initPlayer();
+    }
+  };
+
+  GifVJ.prototype.isCompleted = function() {
+    return this.data.length + this.errors.length === this.parsers.length;
+  };
+
+  GifVJ.prototype.initPlayer = function() {
+    if (!this.isCompleted()) {
       return;
     }
     this.slots = [
@@ -67,41 +101,14 @@ GifVJ = (function() {
       }
     ];
     this.slot = this.slots[0];
-    this.player = new GifVJ.Player(this.canvas, this.datas[this.slot.offset + this.slot.index]);
-    return this.handler.onComplete && this.handler.onComplete(this);
-  };
-
-  GifVJ.prototype.onParseProgress = function(parser) {
-    var frame;
-    if (!(parser.frames.length > 0)) {
-      return;
+    this.player = new GifVJ.Player(this, this.canvas, this.data[this.slot.offset + this.slot.index]);
+    if (this.handler.onComplete) {
+      return this.handler.onComplete(this);
     }
-    frame = parser.frames[parser.frames.length - 1];
-    this.canvas.width = parser.header.width;
-    this.canvas.height = parser.header.height;
-    return this.context.putImageData(frame, 0, 0);
-  };
-
-  GifVJ.prototype.onParseComplete = function(parser) {
-    var percent;
-    this.datas.push({
-      frames: parser.frames,
-      width: parser.header.width,
-      height: parser.header.height
-    });
-    percent = Math.round(this.datas.length / this.urls.length * 100);
-    this.handler.onProgress && this.handler.onProgress(this, percent);
-    return this.initPlayerIfCompleted();
-  };
-
-  GifVJ.prototype.onParseError = function(parser, error) {
-    this.errors.push(error);
-    this.handler.onError && this.handler.onError(this, error);
-    return this.initPlayerIfCompleted();
   };
 
   GifVJ.prototype.onKeyDown = function(e) {
-    var data, diffTime, index, keycode;
+    var datum, diffTime, index, keycode;
     if (!this.player) {
       return;
     }
@@ -122,15 +129,15 @@ GifVJ = (function() {
       case 75:
         return this.player.prevFrame();
       case 82:
-        return this.player.setReverse(!this.player.reverse);
+        return this.player.toggleReverse();
       case 32:
-        if (this.beforeTapTime) {
-          diffTime = new Date - this.beforeTapTime;
+        if (this.beforeTime) {
+          diffTime = new Date - this.beforeTime;
           if (diffTime <= 2000) {
             this.player.setDelay(diffTime / 8);
           }
         }
-        return this.beforeTapTime = new Date;
+        return this.beforeTime = new Date;
       case 49:
       case 50:
       case 51:
@@ -146,7 +153,7 @@ GifVJ = (function() {
       case 79:
       case 80:
         keycode = e.which;
-        if (keycode >= 49 && keycode <= 57) {
+        if ((49 <= keycode && keycode <= 57)) {
           this.slot.index = keycode - 49;
         } else {
           switch (keycode) {
@@ -168,12 +175,11 @@ GifVJ = (function() {
         }
         index = this.slot.offset + this.slot.index;
         while (index >= 0) {
-          data = this.datas[index];
-          if (data) {
-            this.player.setData(data);
+          if (datum = this.data[index]) {
+            this.player.setData(datum);
             return;
           }
-          index = index - this.datas.length;
+          index = index - this.data.length;
         }
     }
   };
@@ -190,32 +196,27 @@ GifVJ = (function() {
 })();
 
 GifVJ.Parser = (function() {
-  function Parser(data, canvas, handler) {
-    this.stream = new Stream(data);
-    this.canvas = canvas || document.createElement('canvas');
-    this.handler = handler || {};
-    this.frames = [];
-    this.parse();
-  }
-
-  Parser.prototype.parse = function() {
+  function Parser(gifVj, data) {
     var error;
+    this.gifVj = gifVj;
+    this.onEndOfFile = __bind(this.onEndOfFile, this);
+    this.onParseImage = __bind(this.onParseImage, this);
+    this.onParseGraphicControlExtension = __bind(this.onParseGraphicControlExtension, this);
+    this.onParseHeader = __bind(this.onParseHeader, this);
+    this.canvas = document.createElement('canvas');
+    this.frames = [];
     try {
-      return parseGIF(this.stream, {
-        hdr: $.proxy(this.onParseHeader, this),
-        gce: $.proxy(this.onParseGraphicControlExtension, this),
-        img: $.proxy(this.onParseImage, this),
-        eof: $.proxy(this.onEndOfFile, this)
+      parseGIF(new Stream(data), {
+        hdr: this.onParseHeader,
+        gce: this.onParseGraphicControlExtension,
+        img: this.onParseImage,
+        eof: this.onEndOfFile
       });
     } catch (_error) {
       error = _error;
-      if (this.handler.onParseError) {
-        return this.handler.onParseError(this, error);
-      } else {
-        throw error;
-      }
+      this.gifVj.onParseError(this, error);
     }
-  };
+  }
 
   Parser.prototype.pushFrame = function() {
     if (this.context) {
@@ -233,38 +234,38 @@ GifVJ.Parser = (function() {
   Parser.prototype.onParseGraphicControlExtension = function(gce) {
     this.pushFrame();
     this.transparency = gce.transparencyGiven ? gce.transparencyIndex : null;
-    return this.disposal_method = gce.disposalMethod;
+    return this.disposalMethod = gce.disposalMethod;
   };
 
   Parser.prototype.onParseImage = function(image) {
-    var color_table, data, index, pixel, _i, _len, _ref;
+    var colorTable, imageData, index, pixel, _i, _len, _ref;
     if (!this.context) {
       this.context = this.canvas.getContext('2d');
     }
-    color_table = image.lctFlag ? image.lct : this.header.gct;
-    data = this.context.getImageData(image.leftPos, image.topPos, image.width, image.height);
+    colorTable = image.lctFlag ? image.lct : this.header.gct;
+    imageData = this.context.getImageData(image.leftPos, image.topPos, image.width, image.height);
     _ref = image.pixels;
     for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
       pixel = _ref[index];
       if (this.transparency !== pixel) {
-        data.data[index * 4 + 0] = color_table[pixel][0];
-        data.data[index * 4 + 1] = color_table[pixel][1];
-        data.data[index * 4 + 2] = color_table[pixel][2];
-        data.data[index * 4 + 3] = 255;
-      } else if (this.disposal_method === 2 || this.disposal_method === 3) {
-        data.data[index * 4 + 3] = 0;
+        imageData.data[index * 4 + 0] = colorTable[pixel][0];
+        imageData.data[index * 4 + 1] = colorTable[pixel][1];
+        imageData.data[index * 4 + 2] = colorTable[pixel][2];
+        imageData.data[index * 4 + 3] = 255;
+      } else if (this.disposalMethod === 2 || this.disposalMethod === 3) {
+        imageData.data[index * 4 + 3] = 0;
       }
     }
-    this.context.putImageData(data, image.leftPos, image.topPos);
-    return this.handler.onParseProgress && this.handler.onParseProgress(this);
+    this.context.putImageData(imageData, image.leftPos, image.topPos);
+    return this.gifVj.onParseProgress(this);
   };
 
   Parser.prototype.onEndOfFile = function() {
     this.pushFrame();
     if (this.frames.length > 1) {
-      return this.handler.onParseComplete && this.handler.onParseComplete(this);
+      return this.gifVj.onParseComplete(this);
     } else {
-      return this.handler.onParseError && this.handler.onParseError(this, new Error('Not a animation GIF file.'));
+      return this.gifVj.onParseError(this, new Error('Not a animation GIF file.'));
     }
   };
 
@@ -273,10 +274,12 @@ GifVJ.Parser = (function() {
 })();
 
 GifVJ.Player = (function() {
-  function Player(canvas, data) {
+  function Player(gifVj, canvas, datum) {
+    this.gifVj = gifVj;
     this.canvas = canvas;
+    this.stepFrame = __bind(this.stepFrame, this);
     this.context = canvas.getContext('2d');
-    this.setData(data);
+    this.setData(datum);
     this.playing = false;
     this.reverse = false;
     this.delay = 100;
@@ -288,7 +291,7 @@ GifVJ.Player = (function() {
     this.index = 0;
     this.canvas.width = this.data.width;
     this.canvas.height = this.data.height;
-    return setTimeout($.proxy(this.setFrame, this), 0);
+    return this.setFrame();
   };
 
   Player.prototype.setFrame = function() {
@@ -316,7 +319,7 @@ GifVJ.Player = (function() {
         this.index = 0;
       }
     }
-    return setTimeout($.proxy(this.stepFrame, this), this.delay);
+    return setTimeout(this.stepFrame, this.delay);
   };
 
   Player.prototype.play = function() {
@@ -358,12 +361,16 @@ GifVJ.Player = (function() {
     return this.setFrame();
   };
 
+  Player.prototype.toggleReverse = function() {
+    return this.setReverse(!this.reverse);
+  };
+
   Player.prototype.setReverse = function(reverse) {
-    return this.reverse = reverse;
+    this.reverse = reverse;
   };
 
   Player.prototype.setDelay = function(delay) {
-    return this.delay = delay;
+    this.delay = delay;
   };
 
   return Player;

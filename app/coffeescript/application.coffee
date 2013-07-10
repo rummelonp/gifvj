@@ -18,7 +18,7 @@ $document.ready ->
     onComplete: (gifVj) ->
       $('nav, #content').fadeOut()
       $canvas.removeClass 'prepared'
-      $document.keydown $.proxy gifVj.onKeyDown, gifVj
+      $document.keydown gifVj.onKeyDown
       gifVj.start()
 
   startGifVJ = (data) ->
