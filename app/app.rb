@@ -10,8 +10,10 @@ class GifVJ < Padrino::Application
 
   get :index do
     @names = GifVJ.cache.hgetall('gifvj:private:names')
+      .to_a
+      .reverse
       .sort_by { |(k, v)| -v.to_i }
-      .take(20)
+      .take(10)
       .map(&:first)
 
     erb :index
