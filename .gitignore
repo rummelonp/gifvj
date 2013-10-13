@@ -1,7 +1,0 @@
-.DS_Store
-log/**/*
-tmp/**/*
-bin/*
-public/images/*.gif
-vendor/gems/*
-!vendor/gems/cache/
