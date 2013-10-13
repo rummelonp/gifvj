@@ -8,3 +8,13 @@ group :assets do
   gem 'therubyracer'
   gem 'uglifier'
 end
+
+group :development, :test do
+  gem 'pry-rails'
+
+  # Guard
+  gem 'guard-livereload'
+
+  # Notification
+  gem 'growl'
+end
