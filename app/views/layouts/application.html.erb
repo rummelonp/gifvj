@@ -1,14 +1,52 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>GifVJ</title>
-  <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
-  <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
-  <%= csrf_meta_tags %>
-</head>
-<body>
-
-<%= yield %>
-
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>GifVJ</title>
+    <%= stylesheet_link_tag "application", media: "all" %>
+    <%= javascript_include_tag "//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tags %>
+  </head>
+  <body>
+    <nav>
+      <a href="http://gif-vj.tumblr.com/" rel="external">Tumblr</a>
+      -
+      <a href=".about" data-toggle="modal">About</a>
+    </nav>
+    <div class="about modal fade hide">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h2 class="h3">About GifVJ</h2>
+          </div>
+          <div class="modal-body">
+            <p>You can VJ with GIF animation of Tumblr</p>
+            <p>The app ported from <%= link_to "http://bimyoo.tumblr.com/post/16857625080/gifvj1-0-processing-gifvj", "http://bimyoo.tumblr.com/post/16857625080/gifvj1-0-processing-gifvj", rel: "external" %></p>
+            <h3 class="h4">How to use</h3>
+            <dl>
+              <dt>enter</dt>
+              <dd>start / stop animation</dd>
+              <dt>j/→</dt>
+              <dd>next frame (only when stopping)</dd>
+              <dt>k/←</dt>
+              <dd>previous frame (only when stopping)</dd>
+              <dt>r</dt>
+              <dd>reverse playback</dd>
+              <dt>space</dt>
+              <dd>rhythm synchronization</dd>
+              <dt>y/u/i/o/p</dt>
+              <dd>select animation block</dd>
+              <dt>1-9</dt>
+              <dd>select animation</dd>
+              <dt>?</dt>
+              <dd>show this</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    <%= yield %>
+  </body>
 </html>

@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="content">
+    <div class="page-header">
+      <h1>GifVJ<h1>
+    </div>
+    <%= form_tag url_for(action: :image_paths), class: "form-inline", remote: true do %>
+      <div class="form-group">
+        <%= text_field_tag :name, "gif-vj", class: "form-control name", placeholder: "Enter Tumblr User" %>
+      </div>
+      <%= button_tag "Start", class: "btn btn-primary submit" %>
+    <% end %>
+    <div class="alert alert-danger hide">
+    </div>
+    <div class="progress progress-striped active hide">
+      <div class="progress-bar progress-bar-info"  style="width: 0%">
+      </div>
+    </div>
+  </div>
+</div>
+<div class="canvas-container hide">
+  <canvas />
+</div>
+<script>
+  $('.name').autocomplete({
+    lookup: <%= @names.to_json.html_safe %>,
+    width: 168,
+    minChars: 0
+  });
+</script>
