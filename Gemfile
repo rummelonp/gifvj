@@ -19,10 +19,4 @@ end
 
 group :development, :test do
   gem 'pry-rails'
-
-  # Guard
-  gem 'guard-livereload'
-
-  # Notification
-  gem 'growl'
 end
